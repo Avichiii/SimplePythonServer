@@ -1,2 +1,2 @@
 Python server for serving files.
-usage: python -h
+usage: python main.py -h
