@@ -2,6 +2,7 @@ from socket import *
 import argparse
 import threading
 import logging
+import zipfile
 import os
 
 MAX_CONNETION = 50
@@ -40,14 +41,34 @@ class ConnectionHandling(threading.Thread):
             req = Request(clinetRequestedData)
             reqFile = req.path[1:]
 
-            filepath = os.path.join(dirPath, reqFile)
+            if '.' not in reqFile:
+                reqDir = reqFile
+                if os.path.exists(reqDir):
+                    zipFilePath = os.path.join(dirPath, reqDir + '.zip')
 
-            if os.path.isfile(filepath):
-                with open(filepath, 'rb') as file:
-                    content = file.read()
+                    with zipfile.ZipFile(zipFilePath, 'w') as zipDir:
+                        for fileName in os.listdir(reqDir):
+                            filePath = os.path.join(dirPath, reqDir, fileName)
+                            zipDir.write(filePath, fileName)
 
-            responseHeader = f'HTTP/1.1 200 OK\r\nContent-Disposition: attachment; filename={reqFile}\r\n\r\n'
-            self.clientCon.sendall(responseHeader.encode() + content)
+                    with open(zipFilePath, 'rb') as zipped:
+                        content = zipped.read()
+                    
+                    responseHeader = f'HTTP/1.1 200 OK\r\nContent-Disposition: attachment; filename={fileName}.zip\r\n\r\n'
+                    self.clientCon.sendall(responseHeader.encode() + content)
+
+                    os.remove(zipFilePath)
+
+            else:
+                filepath = os.path.join(dirPath, reqFile)
+
+                if os.path.isfile(filepath):
+                    with open(filepath, 'rb') as file:
+                        content = file.read()
+
+                responseHeader = f'HTTP/1.1 200 OK\r\nContent-Disposition: attachment; filename={reqFile}\r\n\r\n'
+                self.clientCon.sendall(responseHeader.encode() + content)
+            
             self.clientCon.close()
 
         except FileNotFoundError:
