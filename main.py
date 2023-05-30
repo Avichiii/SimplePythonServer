@@ -26,6 +26,7 @@ class ConnectionHandling(threading.Thread):
     def __init__(self, clientCon:socket):
         super().__init__()
         self.clientCon = clientCon
+        self.serve()
     
     def serve(self):
         try:
@@ -69,7 +70,6 @@ class Server:
             clientCon, addr = self.serverSocket.accept()
             logg.info(f'Received Connection from {addr}')
             thread = ConnectionHandling(clientCon)
-            thread.serve() # initialize serve
             thread.start()
     
     def __del__(self):
