@@ -2,13 +2,18 @@ from socket import *
 import argparse
 import threading
 import logging
+import datetime
 import zipfile
 import os
+
+class LogFormat:
+    getTime = datetime.datetime.now()
+    logFormat = getTime.strftime(f"[%Y-%m-%d %H:%M]")
 
 MAX_CONNETION = 50
 MAX_FILE_SIZE = 30720 * 1024 #30MB
 
-logging.basicConfig(level= logging.DEBUG, filename='pythonServer.log', filemode= 'w',  format='[%(asctime)s] [%(process)s] [%(levelname)s] [%(message)s]')
+logging.basicConfig(level= logging.DEBUG, filename=f'pythonServer{LogFormat.logFormat}.log', filemode= 'w',  format='[%(asctime)s] [%(process)s] [%(levelname)s] [%(message)s]')
 logg = logging.getLogger(__name__)
 
 class Error:
